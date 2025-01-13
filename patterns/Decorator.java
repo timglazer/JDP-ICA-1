@@ -1,109 +1,98 @@
-//Decorator pattern
+// Decorator Pattern Implementation for Network Interface
 
+// Base Interface
+interface NetworkInterface {
+    void sendPacket(Packet packet);
+    void receivePacket(Packet packet);
+}
 
-//Apply decorator patterns to add different dynamic features to packets
-//This pattern helps you expand the behavior of an object during execution
-// without adding responsibility to the default object.
+// Concrete Implementation of Network Interface
+class BasicNetworkInterface implements NetworkInterface {
+    @Override
+    public void sendPacket(Packet packet) {
+        System.out.println("Sending packet: " + packet.getContent());
+    }
 
+    @Override
+    public void receivePacket(Packet packet) {
+        System.out.println("Receiving packet: " + packet.getContent());
+    }
+}
 
-// Base Component
+// Abstract Decorator
+abstract class NetworkInterfaceDecorator implements NetworkInterface {
+    protected NetworkInterface decoratedInterface;
+
+    public NetworkInterfaceDecorator(NetworkInterface decoratedInterface) {
+        this.decoratedInterface = decoratedInterface;
+    }
+
+    @Override
+    public void sendPacket(Packet packet) {
+        decoratedInterface.sendPacket(packet);
+    }
+
+    @Override
+    public void receivePacket(Packet packet) {
+        decoratedInterface.receivePacket(packet);
+    }
+}
+
+// Concrete Decorator for Data Corruption Simulation
+class DataCorruptionDecorator extends NetworkInterfaceDecorator {
+    public DataCorruptionDecorator(NetworkInterface decoratedInterface) {
+        super(decoratedInterface);
+    }
+
+    @Override
+    public void sendPacket(Packet packet) {
+        if (Math.random() < 0.2) { // Simulate 20% chance of corruption
+            System.out.println("Packet corrupted during sending!");
+        } else {
+            super.sendPacket(packet);
+        }
+    }
+
+    @Override
+    public void receivePacket(Packet packet) {
+        if (Math.random() < 0.2) { // Simulate 20% chance of corruption
+            System.out.println("Packet corrupted during receiving!");
+        } else {
+            super.receivePacket(packet);
+        }
+    }
+}
+
+// Packet Class
 class Packet {
     private String content;
-
 
     public Packet(String content) {
         this.content = content;
     }
 
-
     public String getContent() {
         return content;
     }
 
-
     public void setContent(String content) {
         this.content = content;
     }
-
-
-    public void transmit() {
-        System.out.println("Transmitting packet: " + getContent());
-    }
 }
 
-
-// Abstract Decorator
-abstract class PacketDecorator extends Packet {
-    protected Packet packet;
-
-
-    public PacketDecorator(Packet packet) {
-        super(packet.getContent());
-        this.packet = packet;
-    }
-
-
-    @Override
-    public abstract void transmit();
-}
-
-
-// Concrete Decorator for Adding Delay
-class DelayDecorator extends PacketDecorator {
-    private int delayMilliseconds;
-
-
-    public DelayDecorator(Packet packet, int delayMilliseconds) {
-        super(packet);
-        this.delayMilliseconds = delayMilliseconds;
-    }
-
-
-    @Override
-    public void transmit() {
-        try {
-            Thread.sleep(delayMilliseconds); // Simulate delay
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-        System.out.println("Transmitting with delay of " + delayMilliseconds + " ms.");
-        packet.transmit();
-    }
-}
-
-
-// Concrete Decorator for Simulating Corruption
-class CorruptionDecorator extends PacketDecorator {
-    private double corruptionChance; // Chance of corruption
-
-
-    public CorruptionDecorator(Packet packet, double corruptionChance) {
-        super(packet);
-        this.corruptionChance = corruptionChance;
-    }
-
-
-    @Override
-    public void transmit() {
-        // Simulate a chance of corruption
-        if (Math.random() < corruptionChance) {
-            System.out.println("Packet corrupted!");
-        } else {
-            packet.transmit();
-        }
-    }
-}
-
-
-// Main class to demonstrate the use of decorators
+// Main Class to Demonstrate the Pattern
 public class Decorator {
     public static void main(String[] args) {
-        Packet packet = new Packet("This is a network packet");
-        Packet delayedPacket = new DelayDecorator(packet, 500); // Adding 500 ms delay
-        Packet corruptedAndDelayedPacket = new CorruptionDecorator(delayedPacket, 0.3); // Adding corruption with 30% probability
+        NetworkInterface basicInterface = new BasicNetworkInterface();
+        NetworkInterface corruptedInterface = new DataCorruptionDecorator(basicInterface);
 
+        Packet packet = new Packet("This is a network packet.");
 
-        // Transmitting the packet with added behaviors
-        corruptedAndDelayedPacket.transmit();
+        System.out.println("--- Sending Packet ---");
+        corruptedInterface.sendPacket(packet);
+
+        System.out.println("--- Receiving Packet ---");
+        corruptedInterface.receivePacket(packet);
     }
 }
+
