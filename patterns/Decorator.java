@@ -63,22 +63,6 @@ class DataCorruptionDecorator extends NetworkInterfaceDecorator {
     }
 }
 
-// Packet Class
-class Packet {
-    private String content;
-
-    public Packet(String content) {
-        this.content = content;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
-    }
-}
 
 // Main Class to Demonstrate the Pattern
 public class Decorator {
